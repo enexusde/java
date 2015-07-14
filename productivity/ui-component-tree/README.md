@@ -1,2 +1,1 @@
-
-Projects for productivity in multihead environments.
+Shows a structure of AWT/Swing-Components in a tree with automatically update functionality.
