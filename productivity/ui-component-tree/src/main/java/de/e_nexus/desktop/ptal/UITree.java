@@ -7,6 +7,8 @@ import java.awt.Container;
 import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,7 +28,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 @Named
-public final class UITree extends JFrame implements Runnable {
+public final class UITree extends JFrame implements Runnable, ComponentListener {
 
 	public void run() {
 		try {
@@ -41,8 +43,7 @@ public final class UITree extends JFrame implements Runnable {
 		}
 	}
 
-	private final DefaultMutableTreeNode root = new DefaultMutableTreeNode(
-			"<root>");
+	private final DefaultMutableTreeNode root = new DefaultMutableTreeNode("<root>");
 	private final JTree tree = new JTree(root);
 
 	private final JScrollPane scrollPane = new JScrollPane(tree);
@@ -67,10 +68,8 @@ public final class UITree extends JFrame implements Runnable {
 			tree.setRootVisible(false);
 		}
 
-		public void addRecursive(Container container,
-				DefaultMutableTreeNode node, String comment) {
-			DefaultMutableTreeNode relativeRoot = new DefaultMutableTreeNode(
-					describe(container) + comment);
+		public void addRecursive(Container container, DefaultMutableTreeNode node, String comment) {
+			DefaultMutableTreeNode relativeRoot = new DefaultMutableTreeNode(describe(container) + comment);
 			comment = "";
 			node.add(relativeRoot);
 			Component[] components = container.getComponents();
@@ -84,9 +83,7 @@ public final class UITree extends JFrame implements Runnable {
 							Component cc = tp.getComponentAt(i);
 							if (cc instanceof Container) {
 								Container c2 = (Container) cc;
-								addRecursive(c2,
-										(DefaultMutableTreeNode) relativeRoot
-												.getLastChild(),
+								addRecursive(c2, (DefaultMutableTreeNode) relativeRoot.getLastChild(),
 										comment + "{" + tp.getTitleAt(i) + "}");
 							}
 						}
@@ -105,6 +102,14 @@ public final class UITree extends JFrame implements Runnable {
 					n += "[" + constraints + "]";
 				}
 			}
+
+			n += "[" + container.getWidth() + "x" + container.getHeight() + "]";
+			if (container instanceof JTree) {
+
+				JTree t = (JTree) container;
+				n += "[root:" + t.getModel().getRoot() + "]";
+			}
+
 			if (container instanceof BasicArrowButton) {
 				BasicArrowButton b = (BasicArrowButton) container;
 				switch (b.getDirection()) {
@@ -152,6 +157,7 @@ public final class UITree extends JFrame implements Runnable {
 	private final JToggleButton autoRefresh = new JToggleButton("Auto");
 	private Thread thread;
 	private Container target;
+	private UIContainerFrameRectangle targetFrameRectangle;
 
 	public UITree() {
 		super("UI Container Tree");
@@ -168,12 +174,13 @@ public final class UITree extends JFrame implements Runnable {
 		refreshPanel.add(autoRefresh, BorderLayout.WEST);
 		allButtonPanel.add(refreshPanel, BorderLayout.WEST);
 		add(allButtonPanel, BorderLayout.SOUTH);
-
+		addComponentListener(this);
 		pack();
 	}
 
 	@Inject
 	void register(UIContainerFrameRectangle r) {
+		this.targetFrameRectangle = r;
 		setBounds(r);
 		setVisible(true);
 		setTarget(r.getTarget());
@@ -196,5 +203,27 @@ public final class UITree extends JFrame implements Runnable {
 
 	public DefaultMutableTreeNode getRoot() {
 		return root;
+	}
+
+	public void componentResized(ComponentEvent e) {
+		if(targetFrameRectangle!=null){
+			targetFrameRectangle.setBounds(this.getBounds());
+		}
+	}
+
+	public void componentMoved(ComponentEvent e) {
+		if(targetFrameRectangle!=null){
+			targetFrameRectangle.setBounds(this.getBounds());
+		}
+	}
+
+	public void componentShown(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void componentHidden(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }
