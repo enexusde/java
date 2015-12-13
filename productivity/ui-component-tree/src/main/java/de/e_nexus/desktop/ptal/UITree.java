@@ -178,7 +178,7 @@ public final class UITree extends JFrame implements Runnable, ComponentListener 
 		pack();
 	}
 
-	@Inject
+	@Inject private final 
 	void register(UIContainerFrameRectangle r) {
 		this.targetFrameRectangle = r;
 		setBounds(r);
@@ -218,12 +218,8 @@ public final class UITree extends JFrame implements Runnable, ComponentListener 
 	}
 
 	public void componentShown(ComponentEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void componentHidden(ComponentEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 }
